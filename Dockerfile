@@ -1,6 +1,9 @@
-FROM rust:1.83 as builder
+FROM rust:latest as builder
 
 WORKDIR /app
+
+# Install nightly Rust toolchain
+RUN rustup default nightly
 
 # Copy the entire backend workspace
 COPY backend/Cargo.toml backend/Cargo.lock ./
