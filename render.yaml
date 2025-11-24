@@ -1,0 +1,13 @@
+# Render deployment configuration
+services:
+  - type: web
+    name: walx-backend
+    env: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: MONGODB_URI
+        sync: false
+      - key: RUST_LOG
+        value: info
