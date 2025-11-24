@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #F9F8FF;
+  --color-primary-100: #F0EBFF;
+  --color-primary-200: #E0D6FF;
+  --color-primary-300: #C6B3FF;
+  --color-primary-400: #AB9FF2;
+  --color-primary-500: #907CFF;
+  --color-primary-600: #7452FF;
+  --color-primary-700: #5D38DB;
+  --color-primary-800: #4A2DAB;
+  --color-primary-900: #3E268C;
+  --color-primary-950: #22144D;
+}
+
+@layer base {
+  body {
+    @apply bg-[#1a1a1a] text-white antialiased;
+    background-image:
+      radial-gradient(at 0% 0%, rgba(116, 82, 255, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(171, 159, 242, 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(74, 45, 171, 0.15) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(34, 20, 77, 0.2) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-[#2c2c2c]/80 backdrop-blur-xl border border-white/5 rounded-2xl shadow-2xl;
+  }
+
+  .glass-card {
+    @apply bg-[#333333]/60 backdrop-blur-lg border border-white/5 rounded-xl hover:bg-[#3a3a3a]/80 transition-all duration-300;
+  }
+
+  .glass-input {
+    @apply bg-[#222222] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50 transition-all;
+  }
+
+  .glass-button {
+    @apply bg-primary-500 hover:bg-primary-400 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg shadow-primary-500/20 hover:shadow-primary-500/40 active:scale-95;
+  }
+
+  .glass-button-secondary {
+    @apply bg-[#333333] hover:bg-[#444444] text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 border border-white/5;
+  }
+}
