@@ -1,13 +1,14 @@
-FROM rust:1.75 as builder
+FROM rust:1.83 as builder
 
 WORKDIR /app
 
-# Copy Cargo files
+# Copy the entire backend workspace
 COPY backend/Cargo.toml backend/Cargo.lock ./
 COPY backend/blockchain ./blockchain
 COPY backend/server ./server
 
 # Build the application
+WORKDIR /app
 RUN cargo build --release --bin server
 
 # Runtime stage
