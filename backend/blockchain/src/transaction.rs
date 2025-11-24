@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 use sha2::{Sha256, Digest};
-use ed25519_dalek::{Verifier, Signature, VerifyingKey};
+use ed25519_dalek::{Verifier, Signature, PublicKey};
 use hex;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -63,7 +63,12 @@ impl Transaction {
             return false;
         }
 
-        let public_key = match VerifyingKey::from_bytes(&pub_key_bytes.try_into().unwrap()) {
+        let pub_key_array: [u8; 32] = match pub_key_bytes.try_into() {
+            Ok(arr) => arr,
+            Err(_) => return false,
+        };
+
+        let public_key = match PublicKey::from_bytes(&pub_key_array) {
             Ok(pk) => pk,
             Err(_) => return false,
         };
