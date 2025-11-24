@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { Copy, CheckCircle, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 const Login: React.FC = () => {
     const [walletId, setWalletId] = useState('');

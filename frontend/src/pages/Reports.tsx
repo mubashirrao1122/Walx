@@ -12,7 +12,7 @@ interface Transaction {
 
 const Reports: React.FC = () => {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchTransactions = async () => {
@@ -154,7 +154,7 @@ const Reports: React.FC = () => {
                     <>
                         {/* Bar Chart */}
                         <div className="h-64 flex items-end justify-between gap-3">
-                            {monthlyData.map((data, index) => {
+                            {monthlyData.map((data) => {
                                 const heightPercent = maxValue > 0 ? (data.value / maxValue) * 100 : 0;
                                 const hasData = data.value > 0;
 

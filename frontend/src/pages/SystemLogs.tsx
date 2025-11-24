@@ -1,7 +1,6 @@
 // src/pages/SystemLogs.tsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Terminal } from 'lucide-react';
 
 interface LogEntry {
     action: string;
