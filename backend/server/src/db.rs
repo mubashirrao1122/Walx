@@ -11,9 +11,17 @@ pub struct AppState {
 }
 
 pub async fn init_db() -> Result<Database, Box<dyn Error>> {
-    let client_uri = env::var("MONGODB_URI").expect("MONGODB_URI must be set");
+    let client_uri = env::var("MONGODB_URI").unwrap_or_else(|_| {
+        log::error!("❌ MONGODB_URI environment variable is not set!");
+        log::error!("📋 Please set it in your deployment platform (Railway/Render)");
+        log::error!("📋 Example: mongodb+srv://username:password@cluster.mongodb.net/walx");
+        panic!("MONGODB_URI environment variable is required. Cannot start server without database connection.");
+    });
+    
+    log::info!("🔗 Connecting to MongoDB...");
     let client_options = ClientOptions::parse(&client_uri).await?;
     let client = Client::with_options(client_options)?;
     let db = client.database("crypto_wallet");
+    log::info!("✅ Connected to MongoDB successfully!");
     Ok(db)
 }
