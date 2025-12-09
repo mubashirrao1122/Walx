@@ -28,7 +28,10 @@ pub async fn start_zakat_scheduler(data: web::Data<AppState>) {
         while let Some(user) = cursor.next().await {
             if let Ok(u) = user {
                 let balance = {
-                    let chain = data.blockchain.lock().unwrap();
+                    let chain = match data.blockchain.lock() {
+                        Ok(c) => c,
+                        Err(_) => return, // or handle error appropriately
+                    };
                     chain.get_balance(&u.wallet_id)
                 };
 
@@ -42,7 +45,10 @@ pub async fn start_zakat_scheduler(data: web::Data<AppState>) {
         // 2. Apply Deductions (Write phase)
         let mut transactions_added = false;
         {
-            let mut chain = data.blockchain.lock().unwrap();
+            let mut chain = match data.blockchain.lock() {
+                Ok(c) => c,
+                Err(_) => return, // or handle error appropriately
+            };
             
             for (u, deduction) in deductions {
                 if let Ok(wallet) = blockchain::Wallet::from_private_key(&u.encrypted_private_key) {

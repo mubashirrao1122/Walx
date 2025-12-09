@@ -8,7 +8,20 @@ pub async fn send_otp_email(to_email: &str, otp: &str, user_name: &str) -> Resul
     let smtp_username = std::env::var("SMTP_USERNAME")
         .map_err(|_| "SMTP_USERNAME not configured in .env")?;
     let smtp_password = std::env::var("SMTP_PASSWORD")
+        .map(|p| p.replace(" ", "")) // Remove spaces from App Password
         .map_err(|_| "SMTP_PASSWORD not configured in .env")?;
+    let smtp_server = std::env::var("SMTP_SERVER")
+        .unwrap_or_else(|_| "smtp.gmail.com".to_string());
+    // If SMTP_SERVER is set to an email address, fallback to smtp.gmail.com
+    let smtp_server = if smtp_server.contains("@") {
+        "smtp.gmail.com".to_string()
+    } else {
+        smtp_server
+    };
+    let smtp_port: u16 = std::env::var("SMTP_PORT")
+        .unwrap_or_else(|_| "587".to_string())
+        .parse()
+        .unwrap_or(587);
 
     // Build email message
     let email_body = format!(
@@ -30,7 +43,7 @@ pub async fn send_otp_email(to_email: &str, otp: &str, user_name: &str) -> Resul
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>🔐 Walx Login Verification</h1>
+                    <h1>Walx Login Verification</h1>
                 </div>
                 <div class="content">
                     <p>Hello <strong>{}</strong>,</p>
@@ -44,11 +57,11 @@ pub async fn send_otp_email(to_email: &str, otp: &str, user_name: &str) -> Resul
                     <p>If you didn't request this code, please ignore this email or contact support if you're concerned about your account security.</p>
                     
                     <div class="warning">
-                        <strong>⚠️ Security Notice:</strong> Never share this OTP with anyone. Walx staff will never ask for your OTP.
+                        <strong>Security Notice:</strong> Never share this OTP with anyone. Walx staff will never ask for your OTP.
                     </div>
                 </div>
                 <div class="footer">
-                    <p>© 2024 Walx - Decentralized Crypto Wallet</p>
+                    <p>2024 Walx - Decentralized Crypto Wallet</p>
                     <p>This is an automated message, please do not reply to this email.</p>
                 </div>
             </div>
@@ -58,19 +71,24 @@ pub async fn send_otp_email(to_email: &str, otp: &str, user_name: &str) -> Resul
         user_name, otp
     );
 
+    let from_addr = "Walx Security <p229063@cfd.nu.edu.pk>"
+        .parse()
+        .map_err(|e| format!("Invalid from address: {}", e))?;
+    let to_addr = to_email.parse().map_err(|e| format!("Invalid email address: {}", e))?;
     let email = Message::builder()
-        .from("Walx Security <walx771@gmail.com>".parse().unwrap())
-        .to(to_email.parse().map_err(|e| format!("Invalid email address: {}", e))?)
-        .subject("🔐 Your Walx Login OTP Code")
+        .from(from_addr)
+        .to(to_addr)
+    .subject("Your Walx Login OTP Code")
         .header(ContentType::TEXT_HTML)
         .body(email_body)
         .map_err(|e| format!("Failed to build email: {}", e))?;
 
-    // Configure SMTP transport
+    // Configure SMTP transport using STARTTLS for port 587
     let creds = Credentials::new(smtp_username, smtp_password);
     
-    let mailer = SmtpTransport::relay("smtp.gmail.com")
+    let mailer = SmtpTransport::starttls_relay(&smtp_server)
         .map_err(|e| format!("Failed to create SMTP transport: {}", e))?
+        .port(smtp_port)
         .credentials(creds)
         .build();
 

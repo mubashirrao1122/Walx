@@ -29,7 +29,7 @@ impl Blockchain {
     }
 
     pub fn get_latest_block(&self) -> &Block {
-        self.chain.last().unwrap()
+    self.chain.last().expect("Blockchain should have at least one block (genesis block)")
     }
 
     pub fn mine_pending_transactions(&mut self, mining_reward_address: &str) {

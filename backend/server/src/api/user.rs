@@ -24,19 +24,27 @@ pub struct AddBeneficiaryRequest {
 // Add Beneficiary
 pub async fn add_beneficiary(data: web::Data<AppState>, req: web::Json<AddBeneficiaryRequest>) -> impl Responder {
     let collection = data.db.collection::<User>("users");
-    
-    // Check if beneficiary wallet exists (optional but good practice)
-    // For now, we just add it to the list
-    
-    let update_result = collection.update_one(
-        doc! { "wallet_id": &req.wallet_id },
-        doc! { "$addToSet": { "beneficiaries": &req.beneficiary_wallet_id } },
-        None
-    ).await;
 
-    match update_result {
-        Ok(_) => HttpResponse::Ok().json("Beneficiary added successfully"),
-        Err(_) => HttpResponse::InternalServerError().json("Failed to add beneficiary"),
+    // Check if beneficiary wallet exists
+    let beneficiary_exists = collection
+        .find_one(doc! { "wallet_id": &req.beneficiary_wallet_id }, None)
+        .await;
+
+    match beneficiary_exists {
+        Ok(Some(_)) => {
+            // Beneficiary exists, proceed to add
+            let update_result = collection.update_one(
+                doc! { "wallet_id": &req.wallet_id },
+                doc! { "$addToSet": { "beneficiaries": &req.beneficiary_wallet_id } },
+                None
+            ).await;
+            match update_result {
+                Ok(_) => HttpResponse::Ok().json("Beneficiary added successfully"),
+                Err(_) => HttpResponse::InternalServerError().json("Failed to add beneficiary"),
+            }
+        },
+        Ok(None) => HttpResponse::BadRequest().json("Beneficiary wallet does not exist"),
+        Err(_) => HttpResponse::InternalServerError().json("Database error while checking beneficiary"),
     }
 }
 

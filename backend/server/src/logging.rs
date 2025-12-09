@@ -20,6 +20,7 @@ pub async fn log_action(state: &web::Data<AppState>, action: &str, details: &str
         ip_address: ip,
         block_hash: block_hash,
     };
-    // Ignore errors for now; in production you might handle them.
-    let _ = collection.insert_one(log, None).await;
+    if let Err(e) = collection.insert_one(log, None).await {
+        eprintln!("[Logging Error] Failed to insert log entry: {}", e);
+    }
 }

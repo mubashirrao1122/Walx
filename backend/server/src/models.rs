@@ -1,6 +1,18 @@
 use serde::{Serialize, Deserialize};
 use mongodb::bson::oid::ObjectId;
 
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub enum UserRole {
+    Admin,
+    User,
+}
+
+impl Default for UserRole {
+    fn default() -> Self {
+        UserRole::User
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct User {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
@@ -22,6 +34,8 @@ pub struct User {
     pub otp: Option<String>,
     #[serde(default)]
     pub otp_expiry: Option<i64>,
+    #[serde(default)]
+    pub role: UserRole,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

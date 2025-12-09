@@ -3,20 +3,26 @@ use actix_cors::Cors;
 use dotenv::dotenv;
 use std::env;
 
-mod db;
-mod models;
-mod api;
-mod zakat;
-mod logging;
-mod email;
-
-
+use server::{db, models, api, zakat, logging, email};
 use db::AppState;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
+
+    // Check required environment variables at startup
+    let required_env = ["MONGODB_URI", "SMTP_USERNAME", "SMTP_PASSWORD"];
+    let mut missing = Vec::new();
+    for &key in &required_env {
+        if std::env::var(key).is_err() {
+            missing.push(key);
+        }
+    }
+    if !missing.is_empty() {
+    eprintln!("Missing required environment variables: {:?}", missing);
+        std::process::exit(1);
+    }
 
     let db = db::init_db().await.expect("Failed to connect to MongoDB");
     let blockchain = blockchain::Blockchain::new();
@@ -25,13 +31,13 @@ async fn main() -> std::io::Result<()> {
         blockchain: std::sync::Arc::new(std::sync::Mutex::new(blockchain)) 
     };
 
-    let port = env::var("PORT").unwrap_or("8080".to_string());
+    let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let address = format!("0.0.0.0:{}", port);
 
     log::info!("Starting server at http://{}", address);
 
     let app_state_data = web::Data::new(app_state.clone());
-    
+
     // Spawn Zakat Scheduler
     let zakat_data = app_state_data.clone();
     tokio::spawn(async move {

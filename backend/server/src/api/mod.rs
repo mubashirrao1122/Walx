@@ -19,6 +19,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         web::scope("/admin")
             .route("/stats", web::get().to(admin::get_system_stats))
             .route("/users", web::get().to(admin::get_all_users))
+            .route("/promote", web::post().to(admin::promote_to_admin))
+            .route("/mint", web::post().to(admin::mint_coins))
     );
     cfg.service(
         web::scope("/user")

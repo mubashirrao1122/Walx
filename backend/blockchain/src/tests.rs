@@ -1,5 +1,37 @@
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn test_invalid_signature_transaction() {
+        let mut chain = Blockchain::new();
+        let sender = Wallet::new();
+        let receiver = Wallet::new();
+        chain.mine_pending_transactions(&sender.get_wallet_id());
+        let mut tx = chain.create_transaction(
+            &sender,
+            receiver.get_wallet_id(),
+            10,
+            None
+        ).unwrap();
+        // Tamper with signature
+        tx.signature = "invalidsig".to_string();
+        assert!(!chain.add_transaction(tx));
+    }
+
+    #[test]
+    fn test_double_spend_prevention() {
+        let mut chain = Blockchain::new();
+        let sender = Wallet::new();
+        let receiver = Wallet::new();
+        let miner = Wallet::new();
+        chain.mine_pending_transactions(&sender.get_wallet_id());
+        let tx1 = chain.create_transaction(&sender, receiver.get_wallet_id(), 60, None).unwrap();
+        let tx2 = chain.create_transaction(&sender, receiver.get_wallet_id(), 60, None).unwrap();
+        assert!(chain.add_transaction(tx1));
+        // Should fail: not enough balance for second tx
+        assert!(!chain.add_transaction(tx2));
+        chain.mine_pending_transactions(&miner.get_wallet_id());
+        assert_eq!(chain.get_balance(&sender.get_wallet_id()), 40);
+    }
     use crate::chain::Blockchain;
     use crate::wallet::Wallet;
     use crate::transaction::Transaction;
@@ -69,7 +101,11 @@ mod tests {
             receiver.get_wallet_id(), 
             50, 
             Some("Test".to_string())
-        ).expect("Failed to create transaction");
+        );
+        let tx = match tx {
+            Ok(t) => t,
+            Err(e) => panic!("Failed to create transaction: {}", e),
+        };
 
         // 3. Add to chain
         assert!(chain.add_transaction(tx));

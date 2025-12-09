@@ -7,7 +7,10 @@ use mongodb::bson::doc;
 
 pub async fn get_balance(data: web::Data<AppState>, path: web::Path<String>) -> impl Responder {
     let wallet_id = path.into_inner();
-    let blockchain = data.blockchain.lock().unwrap();
+    let blockchain = match data.blockchain.lock() {
+        Ok(b) => b,
+        Err(_) => return HttpResponse::InternalServerError().json("Blockchain lock poisoned"),
+    };
     let balance = blockchain.get_balance(&wallet_id);
     
     // Log balance query
@@ -27,7 +30,10 @@ pub struct SendRequest {
 }
 
 pub async fn send_transaction(data: web::Data<AppState>, req: web::Json<SendRequest>) -> impl Responder {
-    let mut blockchain = data.blockchain.lock().unwrap();
+    let mut blockchain = match data.blockchain.lock() {
+        Ok(b) => b,
+        Err(_) => return HttpResponse::InternalServerError().json("Blockchain lock poisoned"),
+    };
     
     // 1. Fetch sender user to get keys (In real app, we need auth token here)
     let collection = data.db.collection::<User>("users");
@@ -77,7 +83,10 @@ pub async fn send_transaction(data: web::Data<AppState>, req: web::Json<SendRequ
 // Get transaction history for a wallet
 pub async fn get_history(data: web::Data<AppState>, path: web::Path<String>) -> impl Responder {
     let wallet_id = path.into_inner();
-    let blockchain = data.blockchain.lock().unwrap();
+    let blockchain = match data.blockchain.lock() {
+        Ok(b) => b,
+        Err(_) => return HttpResponse::InternalServerError().json("Blockchain lock poisoned"),
+    };
     let mut txs = Vec::new();
     for block in &blockchain.chain {
         for tx in &block.transactions {

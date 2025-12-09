@@ -30,7 +30,8 @@ impl Block {
     }
 
     pub fn calculate_hash(&self) -> String {
-        let tx_data = serde_json::to_string(&self.transactions).unwrap();
+        let tx_data = serde_json::to_string(&self.transactions)
+            .expect("Failed to serialize transactions for block hash");
         let input = format!("{}{}{}{}{}", 
             self.index, 
             self.timestamp, 

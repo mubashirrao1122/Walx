@@ -21,6 +21,7 @@ pub async fn register(data: web::Data<AppState>, mut user: web::Json<User>) -> i
     // For now, we'll just store the hex (INSECURE for production, but per requirements "encrypted using AES/RSA" - we'll simulate or implement basic encryption later)
     user.encrypted_private_key = hex::encode(wallet.keypair.to_bytes()); 
     user.created_at = chrono::Utc::now().timestamp();
+    user.role = crate::models::UserRole::User; // Explicitly set default role
 
     let email = user.email.clone();
     let wallet_id_clone = user.wallet_id.clone();
@@ -64,7 +65,7 @@ pub async fn login(data: web::Data<AppState>, req: web::Json<LoginRequest>) -> i
     let user_result = collection.find_one(doc! { "wallet_id": &req.wallet_id }, None).await;
     
     match user_result {
-        Ok(Some(mut user)) => {
+        Ok(Some(user)) => {
             // Verify private key (In production, use proper hashing/encryption)
             // Here we assume the client sends the key, and we check if it matches the stored one (or derived one)
             // For this project, we'll do a simple check. 
@@ -86,7 +87,7 @@ pub async fn login(data: web::Data<AppState>, req: web::Json<LoginRequest>) -> i
                 // Send OTP via email
                 match crate::email::send_otp_email(&user.email, &otp, &user.full_name).await {
                     Ok(_) => {
-                        println!("✅ OTP email sent successfully to: {}", user.email);
+                        println!("OTP email sent successfully to: {}", user.email);
                         logging::log_action(&data, "OTPSent", &format!("OTP email sent to {}", user.email), "success", None, None).await;
                         HttpResponse::Ok().json(serde_json::json!({ 
                             "status": "otp_sent", 
@@ -94,16 +95,17 @@ pub async fn login(data: web::Data<AppState>, req: web::Json<LoginRequest>) -> i
                         }))
                     },
                     Err(e) => {
-                        eprintln!("❌ Failed to send OTP email: {}", e);
+                        let error_message = format!("Failed to send OTP email to {}: {}", user.email, e);
+                        eprintln!("{}", error_message);
                         // Fallback: print to console for development
                         println!("--------------------------------------------------");
                         println!("LOGIN OTP for {}: {}", user.email, otp);
                         println!("--------------------------------------------------");
-                        
-                        logging::log_action(&data, "OTPFailed", &format!("Email failed for {}, using console", user.email), "warning", None, None).await;
+                        logging::log_action(&data, "OTPFailed", &error_message, "error", None, None).await;
                         HttpResponse::Ok().json(serde_json::json!({ 
                             "status": "otp_sent", 
-                            "message": "OTP sent (check console - email service unavailable)" 
+                            "message": "OTP sent (check console - email service unavailable)",
+                            "error": error_message
                         }))
                     }
                 }
@@ -143,7 +145,11 @@ pub async fn verify_otp(data: web::Data<AppState>, req: web::Json<OtpRequest>) -
                 ).await;
 
                 logging::log_action(&data, "UserLogin", &format!("User {} logged in successfully", user.email), "success", None, None).await;
-                HttpResponse::Ok().json(serde_json::json!({ "status": "success", "message": "Login successful" }))
+                HttpResponse::Ok().json(serde_json::json!({ 
+                    "status": "success", 
+                    "message": "Login successful",
+                    "role": format!("{:?}", user.role)
+                }))
             } else {
                 HttpResponse::BadRequest().json("No OTP request found")
             }

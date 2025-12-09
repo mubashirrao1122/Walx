@@ -37,7 +37,10 @@ impl Transaction {
             self.receiver_wallet_id, 
             self.amount, 
             self.timestamp, 
-            self.note.clone().unwrap_or_default()
+            match &self.note {
+                Some(n) => n.clone(),
+                None => String::new(),
+            }
         );
         let mut hasher = Sha256::new();
         hasher.update(input_data);
