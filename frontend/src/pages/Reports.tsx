@@ -1,6 +1,6 @@
 // src/pages/Reports.tsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { Wallet, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
 
 interface Transaction {
@@ -23,7 +23,7 @@ const Reports: React.FC = () => {
             }
 
             try {
-                const res = await axios.get(`/api/wallet/${walletId}/history`);
+                const res = await api.get(`/wallet/${walletId}/history`);
                 if (res.data && res.data.length > 0) {
                     setTransactions(res.data);
                 }

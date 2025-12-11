@@ -1,6 +1,6 @@
 // src/pages/Explorer.tsx
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { Box, Layers, Hash } from 'lucide-react';
 
 interface Block {
@@ -22,7 +22,7 @@ const Explorer: React.FC = () => {
 
     const fetchBlocks = async () => {
         try {
-            const res = await axios.get('/api/blockchain/blocks');
+            const res = await api.get('/blockchain/blocks');
             setBlocks(res.data.reverse());
         } catch (err) {
             console.error('Failed to fetch blocks', err);

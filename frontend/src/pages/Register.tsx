@@ -1,7 +1,7 @@
 // src/pages/Register.tsx
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { Copy, CheckCircle, ArrowRight, Mail, User, CreditCard } from 'lucide-react';
 
 const Register: React.FC = () => {
@@ -23,7 +23,7 @@ const Register: React.FC = () => {
         setLoading(true);
 
         try {
-            const response = await axios.post('/api/auth/register', {
+            const response = await api.post('/auth/register', {
                 full_name: fullName,
                 email: email,
                 cnic: cnic

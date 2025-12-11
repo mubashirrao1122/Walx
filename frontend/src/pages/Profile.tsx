@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { User, Plus, Trash2, Shield, CreditCard, Mail } from 'lucide-react';
 
 interface UserProfile {
@@ -26,7 +26,7 @@ const Profile: React.FC = () => {
         if (!walletId) return;
 
         try {
-            const res = await axios.get(`/api/user/${walletId}/profile`);
+            const res = await api.get(`/user/${walletId}/profile`);
             setProfile(res.data);
         } catch (err) {
             console.error('Failed to fetch profile', err);
@@ -42,7 +42,7 @@ const Profile: React.FC = () => {
         setError('');
 
         try {
-            await axios.post('/api/user/beneficiary', {
+            await api.post('/user/beneficiary', {
                 wallet_id: profile.wallet_id,
                 beneficiary_wallet_id: newBeneficiary
             });

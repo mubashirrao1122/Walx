@@ -1,6 +1,6 @@
 // src/pages/History.tsx
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { ArrowUpRight, ArrowDownLeft, Calendar } from 'lucide-react';
 
 interface Transaction {
@@ -25,7 +25,7 @@ const History: React.FC = () => {
 
     const fetchHistory = async (id: string) => {
         try {
-            const res = await axios.get(`/api/wallet/${id}/history`);
+            const res = await api.get(`/wallet/${id}/history`);
             setTransactions(res.data.reverse()); // Show newest first
         } catch (err) {
             console.error('Failed to fetch history', err);

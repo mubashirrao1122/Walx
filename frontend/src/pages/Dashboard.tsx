@@ -1,6 +1,6 @@
 // src/pages/Dashboard.tsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { Link } from 'react-router-dom';
 import { Wallet, ArrowUpRight, Clock, Box, Copy, RefreshCw, TrendingUp, Eye, EyeOff, Send, History } from 'lucide-react';
 
@@ -24,7 +24,7 @@ const Dashboard: React.FC = () => {
     const fetchBalance = async (id: string) => {
         setLoading(true);
         try {
-            const res = await axios.get(`/api/wallet/${id}/balance`);
+            const res = await api.get(`/wallet/${id}/balance`);
             setBalance(res.data.balance);
         } catch (err) {
             console.error('Failed to fetch balance', err);
@@ -35,7 +35,7 @@ const Dashboard: React.FC = () => {
 
     const fetchRecentTransactions = async (id: string) => {
         try {
-            const res = await axios.get(`/api/wallet/${id}/history`);
+            const res = await api.get(`/wallet/${id}/history`);
             if (res.data && res.data.length > 0) {
                 // Get last 5 transactions
                 setRecentTransactions(res.data.slice(0, 5));

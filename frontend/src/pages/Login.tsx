@@ -1,7 +1,7 @@
 // src/pages/Login.tsx
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { ArrowRight } from 'lucide-react';
 
 const Login: React.FC = () => {
@@ -21,11 +21,11 @@ const Login: React.FC = () => {
         try {
             if (step === 'credentials') {
                 // Step 1: Send credentials to get OTP
-                await axios.post('/api/auth/login', { wallet_id: walletId, private_key: privateKey });
+                await api.post('/auth/login', { wallet_id: walletId, private_key: privateKey });
                 setStep('otp');
             } else {
                 // Step 2: Verify OTP
-                await axios.post('/api/auth/verify-otp', { wallet_id: walletId, otp });
+                await api.post('/auth/verify-otp', { wallet_id: walletId, otp });
 
                 // If success
                 localStorage.setItem('wallet_id', walletId);

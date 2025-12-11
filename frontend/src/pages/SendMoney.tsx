@@ -1,6 +1,6 @@
 // src/pages/SendMoney.tsx
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import { Send, Wallet, ArrowRight, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
@@ -39,7 +39,7 @@ const SendMoney: React.FC = () => {
         }
 
         try {
-            await axios.post('/api/wallet/send', {
+            await api.post('/wallet/send', {
                 sender_id: walletId,
                 receiver_id: recipient,
                 amount: parseFloat(amount),

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { Users, Database, HardDrive, Cpu, ShieldAlert } from 'lucide-react';
 
 const Admin: React.FC = () => {
@@ -14,8 +14,8 @@ const Admin: React.FC = () => {
     const fetchData = async () => {
         try {
             const [statsRes, usersRes] = await Promise.all([
-                axios.get('/api/admin/stats'),
-                axios.get('/api/admin/users')
+                api.get('/admin/stats'),
+                api.get('/admin/users')
             ]);
             setStats(statsRes.data);
             setUsers(usersRes.data);

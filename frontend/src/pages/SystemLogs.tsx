@@ -1,6 +1,6 @@
 // src/pages/SystemLogs.tsx
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 
 interface LogEntry {
     action: string;
@@ -21,7 +21,7 @@ const SystemLogs: React.FC = () => {
 
     const fetchLogs = async () => {
         try {
-            const res = await axios.get('/api/logs');
+            const res = await api.get('/logs');
             setLogs(res.data);
         } catch (err) {
             console.error('Failed to fetch logs', err);
